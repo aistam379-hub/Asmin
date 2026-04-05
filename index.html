@@ -65,7 +65,7 @@ a { text-decoration: none; color: inherit; }
   padding: 24px 20px; text-align: center;
   border-bottom: 1px solid rgba(255,255,255,.12);
 }
-.sidebar-logo { height: 50px; filter: brightness(0) invert(1); margin-bottom: 6px; }
+.sidebar-logo { height: 60px; filter: none; margin-bottom: 6px; }
 .sidebar-label {
   font-size: 12px; color: rgba(255,255,255,.6);
   font-weight: 500; letter-spacing: .5px;
@@ -163,8 +163,9 @@ a { text-decoration: none; color: inherit; }
 .topbar-logo {
   height: 72px;
   width: auto;
-  filter: brightness(0) invert(1);
+  filter: none;
   display: block;
+  object-fit: contain;
 }
 .topbar-actions {
   display: none;
@@ -176,24 +177,18 @@ a { text-decoration: none; color: inherit; }
   .topbar { display: none; }
   .topbar-logo { height: 92px; }
   .mobile-menu-btn { display: none; }
-  .sidebar-logo { display: none; }
-  .sidebar-brand {
-    display: block;
-    font-size: 16px;
-    color: rgba(255,255,255,.8);
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
+  .sidebar-logo { display: block; height: 80px; filter: none; }
+  .sidebar-brand { display: none; }
   .sidebar-label {
-    font-size: 20px;
-    font-weight: 800;
-    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,.7);
     letter-spacing: 0;
   }
 }
 @media (max-width: 767px) {
-  .topbar { padding: 0 16px; height: 80px; }
-  .topbar-logo { height: 56px; }
+  .topbar { padding: 0 16px; height: 70px; }
+  .topbar-logo { height: 45px; max-width: 140px; }
   .mobile-menu-btn { width: 40px; height: 40px; }
   .mobile-menu-btn svg { width: 22px; height: 22px; }
 }
@@ -759,13 +754,15 @@ a { text-decoration: none; color: inherit; }
       #loginPass:focus{border-color:#F6921E !important;box-shadow:0 0 0 4px rgba(246,146,30,.12) !important}
       #loginBtn:hover{background:#E07D0A !important;transform:translateY(-1px);box-shadow:0 8px 24px rgba(246,146,30,.5) !important}
       #loginBtn:active{transform:scale(.97)}
+      @media (max-width: 767px) {
+        .login-logo { height: 65px !important; max-width: 180px; }
+        #loginForm { padding: 32px 24px !important; border-radius: 24px !important; }
+      }
     </style>
     <div style="margin-bottom:20px">
-      <img src="https://i.postimg.cc/rp89dfPK/IMG-20260405-020557-801.png" alt="طلبك تم" style="height:90px;width:auto;display:block;margin:0 auto">
+      <img src="https://i.postimg.cc/h4p1JFFD/IMG-20260405-020557-801.png" class="login-logo" alt="طلبك تم" style="height:90px;width:auto;display:block;margin:0 auto;object-fit:contain">
     </div>
-    <div style="background:linear-gradient(135deg,#FFF7ED,#FFF3E0);border-radius:12px;padding:10px 16px;margin-bottom:28px;border:1px solid rgba(246,146,30,.15)">
-      <div style="font-size:13px;font-weight:700;color:#92400E">لوحة التحكم الإدارية</div>
-    </div>
+    <!-- تم إزالة جملة لوحة التحكم الإدارية بناءً على طلب المستخدم -->
     <div style="text-align:right;margin-bottom:14px">
       <label style="display:block;font-size:12px;font-weight:800;color:#525252;margin-bottom:6px">البريد الإلكتروني</label>
       <div style="position:relative">
@@ -968,7 +965,7 @@ function openCloudinaryUpload(callback) {
 <!-- Sidebar - now on left side -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <img src="https://i.postimg.cc/rp89dfPK/IMG-20260405-020557-801.png" class="sidebar-logo" alt="طلبك تم">
+    <img src="https://i.postimg.cc/h4p1JFFD/IMG-20260405-020557-801.png" class="sidebar-logo" alt="طلبك تم">
     <div class="sidebar-brand">طلبك تم</div>
     <div class="sidebar-label">لوحة التحكم</div>
   </div>
@@ -1004,7 +1001,7 @@ function openCloudinaryUpload(callback) {
   <!-- Topbar: Blue, curved, logo on left, menu button on right -->
   <div class="topbar">
     <div class="topbar-left">
-      <img src="https://i.postimg.cc/rp89dfPK/IMG-20260405-020557-801.png" class="topbar-logo" alt="طلبك تم" onclick="showSection('ads')" style="cursor:pointer;display:block;-webkit-user-drag:none" tabindex="0">
+      <img src="https://i.postimg.cc/h4p1JFFD/IMG-20260405-020557-801.png" class="topbar-logo" alt="طلبك تم" onclick="showSection('ads')" style="cursor:pointer;display:block;-webkit-user-drag:none" tabindex="0">
     </div>
     <div class="topbar-right">
       <button class="mobile-menu-btn" onclick="openSidebar()">
@@ -1542,9 +1539,10 @@ function buildFormHTML(catId, data = {}) {
   CITIES.forEach(c => { html += `<option value="${c}" ${c === data.city ? 'selected' : ''}>${c}</option>`; });
   html += `</select><div id="fCityOtherWrap" style="display:${data.city === 'أخرى' ? 'block' : 'none'};margin-top:8px"><input type="text" class="form-input" id="fCityOther" value="${data.city && !CITIES.includes(data.city) ? data.city : ''}" placeholder="أدخل المدينة / الموقع"></div></div></div>`;
   
-  html += `<div class="form-group"><label class="form-label">الحي / المنطقة *</label><select class="form-select" id="fNeighborhood" onchange="onNeighborhoodChange()">`;
+  html += `<div class="form-group"><label class="form-label">الحي / المنطقة (اختياري)</label><select class="form-select" id="fNeighborhood" onchange="onNeighborhoodChange()">`;
   const currentCity = data.city && CITIES.includes(data.city) ? data.city : 'جبلة';
   const neighborhoods = NEIGHBORHOODS[currentCity] || NEIGHBORHOODS['جبلة'];
+  html += `<option value="">-- اترك فارغاً (اختياري) --</option>`;
   neighborhoods.forEach(n => { html += `<option value="${n}" ${n === data.neighborhood ? 'selected' : ''}>${n}</option>`; });
   html += `<option value="أخرى" ${data.neighborhood && !neighborhoods.includes(data.neighborhood) ? 'selected' : ''}>أخرى</option>`;
   html += `</select><div id="fNeighborhoodOtherWrap" style="display:${data.neighborhood && !neighborhoods.includes(data.neighborhood) ? 'block' : 'none'};margin-top:8px"><input type="text" class="form-input" id="fNeighborhoodOther" value="${data.neighborhood && !neighborhoods.includes(data.neighborhood) ? data.neighborhood : ''}" placeholder="أدخل الحي / المنطقة"></div></div>`;
@@ -1599,15 +1597,15 @@ function buildFormHTML(catId, data = {}) {
         <option value="توصيل" ${data.profession === 'توصيل' ? 'selected' : ''}>توصيل</option>
         <option value="سيارة نقل صغيرة" ${data.profession === 'سيارة نقل صغيرة' ? 'selected' : ''}>سيارة نقل صغيرة</option>
         <option value="نجار" ${data.profession === 'نجار' ? 'selected' : ''}>نجار</option>
-        <option value="سباق" ${data.profession === 'سباق' ? 'selected' : ''}>سباق</option>
+        <option value="سباك" ${data.profession === 'سباك' ? 'selected' : ''}>سباك</option>
         <option value="ميكانيكي" ${data.profession === 'ميكانيكي' ? 'selected' : ''}>ميكانيكي</option>
         <option value="حلّاق" ${data.profession === 'حلّاق' ? 'selected' : ''}>حلّاق</option>
         <option value="مدرس" ${data.profession === 'مدرس' ? 'selected' : ''}>مدرس</option>
-        <option value="أخرى" ${data.profession && !['كهربائي', 'عامل', 'دهان', 'لحام', 'توصيل', 'سيارة نقل صغيرة', 'نجار', 'سباق', 'ميكانيكي', 'حلّاق', 'مدرس'].includes(data.profession) ? 'selected' : ''}>أخرى</option>
+        <option value="أخرى" ${data.profession && !['كهربائي', 'عامل', 'دهان', 'لحام', 'توصيل', 'سيارة نقل صغيرة', 'نجار', 'سباك', 'ميكانيكي', 'حلّاق', 'مدرس'].includes(data.profession) ? 'selected' : ''}>أخرى</option>
       </select></div>
-      <div class="form-group" id="fProfessionOtherWrap" style="display: ${data.profession && !['كهربائي', 'عامل', 'دهان', 'لحام', 'توصيل', 'سيارة نقل صغيرة', 'نجار', 'سباق', 'ميكانيكي', 'حلّاق', 'مدرس'].includes(data.profession) ? 'block' : 'none'}">
+      <div class="form-group" id="fProfessionOtherWrap" style="display: ${data.profession === 'أخرى' || (data.profession && !['كهربائي', 'عامل', 'دهان', 'لحام', 'توصيل', 'سيارة نقل صغيرة', 'نجار', 'سباك', 'ميكانيكي', 'حلّاق', 'مدرس'].includes(data.profession)) ? 'block' : 'none'}">
         <label class="form-label">حدد المهنة</label>
-        <input type="text" class="form-input" id="fProfessionOther" value="${data.profession && !['كهربائي', 'عامل', 'دهان', 'لحام', 'توصيل', 'سيارة نقل صغيرة', 'نجار', 'سباق', 'ميكانيكي', 'حلّاق', 'مدرس'].includes(data.profession) ? data.profession : ''}" placeholder="أدخل المهنة">
+        <input type="text" class="form-input" id="fProfessionOther" value="${data.profession && !['كهربائي', 'عامل', 'دهان', 'لحام', 'توصيل', 'سيارة نقل صغيرة', 'نجار', 'سباك', 'ميكانيكي', 'حلّاق', 'مدرس'].includes(data.profession) ? data.profession : ''}" placeholder="أدخل المهنة">
       </div>
       <div class="form-group"><label class="form-label">رقم التواصل (واتساب) *</label><input type="text" class="form-input" id="fPhone" value="${data.phone || ''}" placeholder="963XXXXXXXXX" dir="ltr"></div>
     </div>`;
@@ -1727,10 +1725,16 @@ function onCityChange() {
     otherWrap.style.display = 'none';
     document.getElementById('fCityOther').value = '';
   }
+  // Reset neighborhood value when city changes
+  document.getElementById('fNeighborhood').value = '';
   // Update neighborhoods
   const neighborhoods = NEIGHBORHOODS[city] || NEIGHBORHOODS['جبلة'];
   const select = document.getElementById('fNeighborhood');
   select.innerHTML = '';
+  const optEmpty = document.createElement('option');
+  optEmpty.value = '';
+  optEmpty.textContent = '-- اترك فارغاً (اختياري) --';
+  select.appendChild(optEmpty);
   neighborhoods.forEach(n => {
     const opt = document.createElement('option');
     opt.value = n;
@@ -1754,6 +1758,18 @@ function onNeighborhoodChange() {
   } else {
     otherWrap.style.display = 'none';
     document.getElementById('fNeighborhoodOther').value = '';
+  }
+}
+
+function onProfessionChange() {
+  const profession = document.getElementById('fProfession').value;
+  const otherWrap = document.getElementById('fProfessionOtherWrap');
+  if (profession === 'أخرى') {
+    otherWrap.style.display = 'block';
+    document.getElementById('fProfessionOther').focus();
+  } else {
+    otherWrap.style.display = 'none';
+    document.getElementById('fProfessionOther').value = '';
   }
 }
 
@@ -2233,7 +2249,7 @@ function searchAdsForDeal() {
   const q = document.getElementById('dealAdSearch').value.trim().toLowerCase();
   const results = document.getElementById('dealSearchResults');
   if (!q) { results.style.display = 'none'; return; }
-  const matched = ads.filter(a => a.ref.toLowerCase().includes(q) || a.title.toLowerCase().includes(q)).slice(0, 8);
+  const matched = ads.filter(a => !isFreeAd(a.catId) && (a.ref.toLowerCase().includes(q) || a.title.toLowerCase().includes(q))).slice(0, 8);
   if (matched.length === 0) { results.style.display = 'block'; results.innerHTML = '<div style="padding:16px;text-align:center;color:var(--s400);font-size:13px">لا توجد نتائج</div>'; return; }
   results.style.display = 'block';
   results.innerHTML = matched.map(a => `
