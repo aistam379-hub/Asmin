@@ -1437,7 +1437,7 @@ function renderAds() {
           </div>
         </td>
         <td><span class="cat-badge ${a.catId}">${cat?.label || ''}</span></td>
-        <td class="price-cell">${fmtPrice(a.price)}</td>
+        ${!isFreeAd(a.catId) ? `<td class="price-cell">${fmtPrice(a.price)}</td>` : '<td>—</td>'}
         <td class="loc-cell">${a.city && a.neighborhood ? a.neighborhood + ' / ' + a.city : a.location}</td>
         <td>
           <div class="actions-cell">
@@ -1479,8 +1479,10 @@ function renderAds() {
         </div>
         <div class="m-card-body">
           <span class="m-card-tag" style="background:${getCatBg(a.catId)};color:${getCatColor(a.catId)}">${cat?.label}</span>
-          <span class="m-card-tag">${fmtPrice(a.price)}</span>
-          <span class="m-card-tag">${a.city && a.neighborhood ? a.neighborhood + ' / ' + a.city : a.location}</span>
+          ${!isFreeAd(a.catId) ? `<span class="m-card-tag">${fmtPrice(a.price)}</span>` : ''}
+          ${isFreeAd(a.catId) && a.profession ? `<span class="m-card-tag" style="background:var(--green-lt);color:var(--green-dk)">${a.profession}</span>` : ''}
+          ${a.neighborhood ? `<span class="m-card-tag"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:middle;margin-left:2px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${a.neighborhood}</span>` : ''}
+          ${a.city ? `<span class="m-card-tag">${a.city}</span>` : (!a.neighborhood && a.location ? `<span class="m-card-tag">${a.location}</span>` : '')}
         </div>
         <div class="m-card-actions">
           <button class="m-card-btn edit" onclick="openEditModal('${a.id}')">
@@ -1547,7 +1549,11 @@ function buildFormHTML(catId, data = {}) {
   html += `<option value="أخرى" ${data.neighborhood && !neighborhoods.includes(data.neighborhood) ? 'selected' : ''}>أخرى</option>`;
   html += `</select><div id="fNeighborhoodOtherWrap" style="display:${data.neighborhood && !neighborhoods.includes(data.neighborhood) ? 'block' : 'none'};margin-top:8px"><input type="text" class="form-input" id="fNeighborhoodOther" value="${data.neighborhood && !neighborhoods.includes(data.neighborhood) ? data.neighborhood : ''}" placeholder="أدخل الحي / المنطقة"></div></div>`;
 
-	  html += `<div class="form-row"><div class="form-group"><label class="form-label">السعر (ل.س) *</label><input type="number" class="form-input" id="fPrice" value="${data.price || 0}" placeholder="0"></div><div></div></div>`;
+	  if (!isFreeAd(catId)) {
+    html += `<div class="form-row"><div class="form-group"><label class="form-label">السعر (ل.س) *</label><input type="number" class="form-input" id="fPrice" value="${data.price || 0}" placeholder="0"></div><div></div></div>`;
+  } else {
+    html += `<input type="hidden" id="fPrice" value="0">`;
+  }
 
   if (isApt(catId)) {
     html += `<div style="background:var(--teal-lt);border-radius:12px;padding:16px;margin-bottom:18px">
