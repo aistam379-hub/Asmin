@@ -968,7 +968,7 @@ function openCloudinaryUpload(callback) {
 <!-- Sidebar - now on left side -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <img src="https://i.ibb.co/qLf6SZHv/3e7b8340-6509-45e8-a95a-35cb41bef2d6.webp" class="sidebar-logo" alt="طلبك تم">
+    <img src="https://i.postimg.cc/zB2fcxCd/IMG-20260405-020557-801.png" class="sidebar-logo" alt="طلبك تم">
     <div class="sidebar-brand">طلبك تم</div>
     <div class="sidebar-label">لوحة التحكم</div>
   </div>
@@ -1004,7 +1004,7 @@ function openCloudinaryUpload(callback) {
   <!-- Topbar: Blue, curved, logo on left, menu button on right -->
   <div class="topbar">
     <div class="topbar-left">
-      <img src="https://i.ibb.co/99dWqpwt/logo.png" class="topbar-logo" alt="طلبك تم" onerror="this.src='https://i.ibb.co/qLf6SZHv/3e7b8340-6509-45e8-a95a-35cb41bef2d6.webp'" onclick="showSection('ads')" style="cursor:pointer;display:block;-webkit-user-drag:none" tabindex="0">
+      <img src="https://i.postimg.cc/zB2fcxCd/IMG-20260405-020557-801.png" class="topbar-logo" alt="طلبك تم" onclick="showSection('ads')" style="cursor:pointer;display:block;-webkit-user-drag:none" tabindex="0">
     </div>
     <div class="topbar-right">
       <button class="mobile-menu-btn" onclick="openSidebar()">
@@ -1282,13 +1282,23 @@ const CATS = [
   { id: 'free-ad', label: 'إعلانات مجانية', type: 'freead', action: 'free' },
 ];
 
-const LOCS = [
-  'حي العمارة','حي العزي','حي الدريبة','حي القلعة',
-  'حي السوق (المدينة القديمة)','حي الفيض','حي الجبيبات','حي النقعة',
-  'حي الميناء','حي الكورنيش','حي التغرة','حي الجركس',
-  'حي جب جويخة','المتحلق','حي الصليبة','حي المهجع',
-  'حي المفيض','ضاحية المجد'
-];
+const CITIES = ['جبلة', 'اللاذقية', 'أخرى'];
+
+const NEIGHBORHOODS = {
+  'جبلة': ['حي العمارة','حي العزي','حي الدريبة','حي القلعة',
+    'حي السوق (المدينة القديمة)','حي الفيض','حي الجبيبات','حي النقعة',
+    'حي الميناء','حي الكورنيش','حي التغرة','حي الجركس',
+    'حي جب جويخة','المتحلق','حي الصليبة','حي المهجع',
+    'حي المفيض','ضاحية المجد'],
+  'اللاذقية': ['حي العمارة','حي العزي','حي الدريبة','حي القلعة',
+    'حي السوق (المدينة القديمة)','حي الفيض','حي الجبيبات','حي النقعة',
+    'حي الميناء','حي الكورنيش','حي التغرة','حي الجركس',
+    'حي جب جويخة','المتحلق','حي الصليبة','حي المهجع',
+    'حي المفيض','ضاحية المجد']
+};
+
+// For backward compatibility
+const LOCS = NEIGHBORHOODS['جبلة'];
 
 const CAR_BRANDS = ['تويوتا','هيونداي','كيا','نيسان','شيفروليه','سوزوكي','فورد','مرسيدس','بي إم دبليو','هوندا','مازدا','ميتسوبيشي','فولكس واغن','بيجو','رينو','سكودا','أوبل','فيات','MG','شيري','جيلي','BYD'];
 const CAR_CLASSES = ['سيدان','هاتشباك','SUV','بيك أب','فان','كوبيه','كروس أوفر'];
@@ -1325,7 +1335,7 @@ async function loadAdsFirebase() {
     const snap = await db.collection('ads').where('status','==','active').get();
     return snap.docs.map(doc => {
       const d = doc.data();
-      return { id: doc.id, ref: d.ref || '', catId: d.catId || '', title: d.title || '', price: d.price || 0, location: d.location || '', desc: d.desc || '', phone: d.phone || '', images: d.images || [], image_ids: d.image_ids || [], featured: d.featured || false, negotiable: d.negotiable || false, rooms: d.rooms, baths: d.baths, area: d.area, kitchens: d.kitchens, balconies: d.balconies, living: d.living, storage: d.storage, carType: d.carType, carModel: d.carModel, carYear: d.carYear, carKm: d.carKm, carColor: d.carColor, carClass: d.carClass, profession: d.profession, createdAt: d.created_at };
+      return { id: doc.id, ref: d.ref || '', catId: d.catId || '', title: d.title || '', price: d.price || 0, location: d.location || '', city: d.city || '', neighborhood: d.neighborhood || '', desc: d.desc || '', phone: d.phone || '', images: d.images || [], image_ids: d.image_ids || [], featured: d.featured || false, negotiable: d.negotiable || false, rooms: d.rooms, baths: d.baths, area: d.area, kitchens: d.kitchens, balconies: d.balconies, living: d.living, storage: d.storage, carType: d.carType, carModel: d.carModel, carYear: d.carYear, carKm: d.carKm, carColor: d.carColor, carClass: d.carClass, profession: d.profession, createdAt: d.created_at };
     });
   } catch(e) { console.error('Firebase load error:', e); return []; }
 }
@@ -1428,7 +1438,7 @@ function renderAds() {
         </td>
         <td><span class="cat-badge ${a.catId}">${cat?.label || ''}</span></td>
         <td class="price-cell">${fmtPrice(a.price)}</td>
-        <td class="loc-cell">${a.location}</td>
+        <td class="loc-cell">${a.city && a.neighborhood ? a.neighborhood + ' / ' + a.city : a.location}</td>
         <td>
           <div class="actions-cell">
             <button class="btn-icon btn-view" title="عرض التفاصيل" onclick="openViewModal('${a.id}')">
@@ -1470,7 +1480,7 @@ function renderAds() {
         <div class="m-card-body">
           <span class="m-card-tag" style="background:${getCatBg(a.catId)};color:${getCatColor(a.catId)}">${cat?.label}</span>
           <span class="m-card-tag">${fmtPrice(a.price)}</span>
-          <span class="m-card-tag">${a.location}</span>
+          <span class="m-card-tag">${a.city && a.neighborhood ? a.neighborhood + ' / ' + a.city : a.location}</span>
         </div>
         <div class="m-card-actions">
           <button class="m-card-btn edit" onclick="openEditModal('${a.id}')">
@@ -1526,9 +1536,16 @@ function buildFormHTML(catId, data = {}) {
 
   html += `<div class="form-row"><div class="form-group"><label class="form-label">الفئة *</label><select class="form-select" id="fCatId" onchange="onCatChange()">`;
   CATS.forEach(c => { html += `<option value="${c.id}" ${c.id === catId ? 'selected' : ''}>${c.label}</option>`; });
-  html += `</select></div><div class="form-group"><label class="form-label">الموقع / الحي *</label><select class="form-select" id="fLocation">`;
-  LOCS.forEach(l => { html += `<option value="${l}" ${l === data.location ? 'selected' : ''}>${l}</option>`; });
-  html += `</select></div></div>`;
+  html += `</select></div><div class="form-group"><label class="form-label">المدينة / الموقع *</label><select class="form-select" id="fCity" onchange="onCityChange()">`;
+  CITIES.forEach(c => { html += `<option value="${c}" ${c === data.city ? 'selected' : ''}>${c}</option>`; });
+  html += `</select><div id="fCityOtherWrap" style="display:${data.city === 'أخرى' ? 'block' : 'none'};margin-top:8px"><input type="text" class="form-input" id="fCityOther" value="${data.city && !CITIES.includes(data.city) ? data.city : ''}" placeholder="أدخل المدينة / الموقع"></div></div></div>`;
+  
+  html += `<div class="form-group"><label class="form-label">الحي / المنطقة *</label><select class="form-select" id="fNeighborhood" onchange="onNeighborhoodChange()">`;
+  const currentCity = data.city && CITIES.includes(data.city) ? data.city : 'جبلة';
+  const neighborhoods = NEIGHBORHOODS[currentCity] || NEIGHBORHOODS['جبلة'];
+  neighborhoods.forEach(n => { html += `<option value="${n}" ${n === data.neighborhood ? 'selected' : ''}>${n}</option>`; });
+  html += `<option value="أخرى" ${data.neighborhood && !neighborhoods.includes(data.neighborhood) ? 'selected' : ''}>أخرى</option>`;
+  html += `</select><div id="fNeighborhoodOtherWrap" style="display:${data.neighborhood && !neighborhoods.includes(data.neighborhood) ? 'block' : 'none'};margin-top:8px"><input type="text" class="form-input" id="fNeighborhoodOther" value="${data.neighborhood && !neighborhoods.includes(data.neighborhood) ? data.neighborhood : ''}" placeholder="أدخل الحي / المنطقة"></div></div>`;
 
 	  html += `<div class="form-row"><div class="form-group"><label class="form-label">السعر (ل.س) *</label><input type="number" class="form-input" id="fPrice" value="${data.price || 0}" placeholder="0"></div><div></div></div>`;
 
@@ -1567,6 +1584,25 @@ function buildFormHTML(catId, data = {}) {
   } else if (isFreeAd(catId)) {
     html += `<div style="background:var(--green-lt);border-radius:12px;padding:16px;margin-bottom:18px">
       <div style="font-size:13px;font-weight:800;color:var(--green-dk);margin-bottom:12px">بيانات صاحب الإعلان</div>
+      <div class="form-group"><label class="form-label">نوع المهنة *</label><select class="form-select" id="fProfession" onchange="onProfessionChange()">
+        <option value="">-- اختر المهنة --</option>
+        <option value="كهربائي" ${data.profession === 'كهربائي' ? 'selected' : ''}>كهربائي</option>
+        <option value="عامل" ${data.profession === 'عامل' ? 'selected' : ''}>عامل</option>
+        <option value="دهان" ${data.profession === 'دهان' ? 'selected' : ''}>دهان</option>
+        <option value="لحام" ${data.profession === 'لحام' ? 'selected' : ''}>لحام</option>
+        <option value="توصيل" ${data.profession === 'توصيل' ? 'selected' : ''}>توصيل</option>
+        <option value="سيارة نقل صغيرة" ${data.profession === 'سيارة نقل صغيرة' ? 'selected' : ''}>سيارة نقل صغيرة</option>
+        <option value="نجار" ${data.profession === 'نجار' ? 'selected' : ''}>نجار</option>
+        <option value="سباق" ${data.profession === 'سباق' ? 'selected' : ''}>سباق</option>
+        <option value="ميكانيكي" ${data.profession === 'ميكانيكي' ? 'selected' : ''}>ميكانيكي</option>
+        <option value="حلّاق" ${data.profession === 'حلّاق' ? 'selected' : ''}>حلّاق</option>
+        <option value="مدرس" ${data.profession === 'مدرس' ? 'selected' : ''}>مدرس</option>
+        <option value="أخرى" ${data.profession && !['كهربائي', 'عامل', 'دهان', 'لحام', 'توصيل', 'سيارة نقل صغيرة', 'نجار', 'سباق', 'ميكانيكي', 'حلّاق', 'مدرس'].includes(data.profession) ? 'selected' : ''}>أخرى</option>
+      </select></div>
+      <div class="form-group" id="fProfessionOtherWrap" style="display: ${data.profession && !['كهربائي', 'عامل', 'دهان', 'لحام', 'توصيل', 'سيارة نقل صغيرة', 'نجار', 'سباق', 'ميكانيكي', 'حلّاق', 'مدرس'].includes(data.profession) ? 'block' : 'none'}">
+        <label class="form-label">حدد المهنة</label>
+        <input type="text" class="form-input" id="fProfessionOther" value="${data.profession && !['كهربائي', 'عامل', 'دهان', 'لحام', 'توصيل', 'سيارة نقل صغيرة', 'نجار', 'سباق', 'ميكانيكي', 'حلّاق', 'مدرس'].includes(data.profession) ? data.profession : ''}" placeholder="أدخل المهنة">
+      </div>
       <div class="form-group"><label class="form-label">رقم التواصل (واتساب) *</label><input type="text" class="form-input" id="fPhone" value="${data.phone || ''}" placeholder="963XXXXXXXXX" dir="ltr"></div>
     </div>`;
   }
@@ -1675,19 +1711,64 @@ function openEditModal(id) {
   document.getElementById('adModal').classList.add('open');
 }
 
+function onCityChange() {
+  const city = document.getElementById('fCity').value;
+  const otherWrap = document.getElementById('fCityOtherWrap');
+  if (city === 'أخرى') {
+    otherWrap.style.display = 'block';
+    document.getElementById('fCityOther').focus();
+  } else {
+    otherWrap.style.display = 'none';
+    document.getElementById('fCityOther').value = '';
+  }
+  // Update neighborhoods
+  const neighborhoods = NEIGHBORHOODS[city] || NEIGHBORHOODS['جبلة'];
+  const select = document.getElementById('fNeighborhood');
+  select.innerHTML = '';
+  neighborhoods.forEach(n => {
+    const opt = document.createElement('option');
+    opt.value = n;
+    opt.textContent = n;
+    select.appendChild(opt);
+  });
+  const optOther = document.createElement('option');
+  optOther.value = 'أخرى';
+  optOther.textContent = 'أخرى';
+  select.appendChild(optOther);
+  select.value = '';
+  document.getElementById('fNeighborhoodOtherWrap').style.display = 'none';
+}
+
+function onNeighborhoodChange() {
+  const neighborhood = document.getElementById('fNeighborhood').value;
+  const otherWrap = document.getElementById('fNeighborhoodOtherWrap');
+  if (neighborhood === 'أخرى') {
+    otherWrap.style.display = 'block';
+    document.getElementById('fNeighborhoodOther').focus();
+  } else {
+    otherWrap.style.display = 'none';
+    document.getElementById('fNeighborhoodOther').value = '';
+  }
+}
+
 function onCatChange() {
   const catId = document.getElementById('fCatId').value;
   const title = document.getElementById('fTitle')?.value || '';
-  const location = document.getElementById('fLocation')?.value || '';
+  const city = document.getElementById('fCity')?.value || '';
+  const cityOther = document.getElementById('fCityOther')?.value || '';
+  const neighborhood = document.getElementById('fNeighborhood')?.value || '';
+  const neighborhoodOther = document.getElementById('fNeighborhoodOther')?.value || '';
   const price = document.getElementById('fPrice')?.value || 0;
   const phone = document.getElementById('fPhone')?.value || '';
+  const profession = document.getElementById('fProfession')?.value || '';
+  const professionOther = document.getElementById('fProfessionOther')?.value || '';
   const desc = document.getElementById('fDesc')?.value || '';
   const images = document.getElementById('fImages')?.value || '';
   const featured = document.getElementById('fFeatured')?.checked || false;
   const negotiable = document.getElementById('fNegotiable')?.checked || false;
 
   document.getElementById('modalBody').innerHTML = buildFormHTML(catId, {
-    title, location, price: Number(price), phone, desc,
+    title, city: city === 'أخرى' ? cityOther : city, neighborhood: neighborhood === 'أخرى' ? neighborhoodOther : neighborhood, price: Number(price), phone, profession: profession === 'أخرى' ? professionOther : profession, desc,
     images: images.split('\n').filter(Boolean), featured, negotiable
   });
 }
@@ -1748,7 +1829,7 @@ function openViewModal(id) {
         <div style="font-size:24px;font-weight:900;color:var(--primary)">${fmtPrice(a.price)}</div>
         <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--s500);font-weight:600">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          ${a.location}
+          ${a.city && a.neighborhood ? a.neighborhood + ' / ' + a.city : a.location}
         </div>
       </div>
       ${specificHTML}
@@ -1764,10 +1845,15 @@ function openEditFromView() {
 async function saveAd() {
   const catId = document.getElementById('fCatId').value;
   const title = document.getElementById('fTitle').value.trim();
-  const location = document.getElementById('fLocation').value;
-	  const price = Number(document.getElementById('fPrice').value) || 0;
-	  const phone = document.getElementById('fPhone')?.value.trim() || "";
-	  const desc = document.getElementById('fDesc').value.trim();
+  const city = document.getElementById('fCity').value;
+  const cityOther = document.getElementById('fCityOther')?.value.trim() || '';
+  const neighborhood = document.getElementById('fNeighborhood').value;
+  const neighborhoodOther = document.getElementById('fNeighborhoodOther')?.value.trim() || '';
+  const price = Number(document.getElementById('fPrice').value) || 0;
+  const phone = document.getElementById('fPhone')?.value.trim() || "";
+  const profession = document.getElementById('fProfession')?.value || '';
+  const professionOther = document.getElementById('fProfessionOther')?.value.trim() || '';
+  const desc = document.getElementById('fDesc').value.trim();
   const images = [];
   const image_ids = [];
   for (let i = 0; i < 5; i++) {
@@ -1781,7 +1867,15 @@ async function saveAd() {
 
 	  if (!title) { toast('يرجى إدخال عنوان الإعلان', 'error'); return; }
 
-  const ad = { catId, title, location, price, phone, desc, images, image_ids, featured, negotiable };
+  const finalCity = city === 'أخرى' ? cityOther : city;
+  const finalNeighborhood = neighborhood === 'أخرى' ? neighborhoodOther : neighborhood;
+  
+  const ad = { catId, title, city: finalCity, neighborhood: finalNeighborhood, location: finalNeighborhood + ' ' + finalCity, price, phone, desc, images, image_ids, featured, negotiable };
+
+  // Add profession for free ads
+  if (isFreeAd(catId)) {
+    ad.profession = profession === 'أخرى' ? professionOther : profession;
+  }
 
   if (isApt(catId)) {
     ad.rooms = Number(document.getElementById('fRooms')?.value) || 0;
@@ -2463,10 +2557,22 @@ function toast(msg, type = '') {
 
 /* ===== INIT ===== */
 if (USE_FIREBASE) {
-  loadAdsFirebase().then(fbAds => {
+  // Real-time listener for auto-refresh
+  db.collection('ads').where('status', '==', 'active').onSnapshot(snapshot => {
+    const fbAds = snapshot.docs.map(doc => {
+      const d = doc.data();
+      return { id: doc.id, ref: d.ref || '', catId: d.catId || '', title: d.title || '', price: d.price || 0, location: d.location || '', city: d.city || '', neighborhood: d.neighborhood || '', desc: d.desc || '', phone: d.phone || '', images: d.images || [], image_ids: d.image_ids || [], featured: d.featured || false, negotiable: d.negotiable || false, rooms: d.rooms, baths: d.baths, area: d.area, kitchens: d.kitchens, balconies: d.balconies, living: d.living, storage: d.storage, carType: d.carType, carModel: d.carModel, carYear: d.carYear, carKm: d.carKm, carColor: d.carColor, carClass: d.carClass, profession: d.profession, createdAt: d.created_at };
+    });
     ads = fbAds;
     renderAds();
     lucide.createIcons();
+  }, err => {
+    console.error('Firestore listener error:', err);
+    loadAdsFirebase().then(fbAds => {
+      ads = fbAds;
+      renderAds();
+      lucide.createIcons();
+    });
   });
 } else {
   renderAds();
