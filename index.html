@@ -65,7 +65,7 @@ a { text-decoration: none; color: inherit; }
   padding: 24px 20px; text-align: center;
   border-bottom: 1px solid rgba(255,255,255,.12);
 }
-.sidebar-logo { height: 50px; width: auto; filter: none; margin-bottom: 6px; object-fit: contain; }
+.sidebar-logo { height: 80px; width: auto; filter: none; margin-bottom: 6px; object-fit: contain; }
 .sidebar-label {
   font-size: 12px; color: rgba(255,255,255,.6);
   font-weight: 500; letter-spacing: .5px;
@@ -177,7 +177,7 @@ a { text-decoration: none; color: inherit; }
   .topbar { display: none; }
   .topbar-logo { height: 120px; }
   .mobile-menu-btn { display: none; }
-  .sidebar-logo { display: block; height: 50px; filter: none; }
+  .sidebar-logo { display: block; height: 80px; filter: none; }
   .sidebar-brand { display: none; }
   .sidebar-label {
     font-size: 13px;
@@ -187,8 +187,8 @@ a { text-decoration: none; color: inherit; }
   }
 }
 @media (max-width: 767px) {
-  .topbar { padding: 0 16px; height: 70px; }
-  .topbar-logo { height: 80px; max-width: 220px; }
+  .topbar { padding: 0 16px; height: 64px; }
+  .topbar-logo { height: 48px; max-width: 140px; }
   .mobile-menu-btn { width: 40px; height: 40px; }
   .mobile-menu-btn svg { width: 22px; height: 22px; }
 }
@@ -2154,7 +2154,32 @@ function saveBlockedDates() {
 /* ===== DEALS ===== */
 const DEALS_KEY = 'talbaktem_deals';
 function loadDeals() { try { return JSON.parse(localStorage.getItem(DEALS_KEY) || '[]'); } catch(e) { return []; } }
-function saveDeals(d) { localStorage.setItem(DEALS_KEY, JSON.stringify(d)); }
+function saveDeals(d) {
+  localStorage.setItem(DEALS_KEY, JSON.stringify(d));
+}
+async function saveDealsFirebase(deal, isUpdate) {
+  if (!USE_FIREBASE) return;
+  try {
+    if (isUpdate) {
+      await db.collection('deals').doc(String(deal.id)).set(deal);
+    } else {
+      await db.collection('deals').doc(String(deal.id)).set(deal);
+    }
+  } catch(e) { console.error('Error saving deal to Firebase:', e); }
+}
+async function loadDealsFirebase() {
+  if (!USE_FIREBASE) return;
+  try {
+    const snap = await db.collection('deals').orderBy('id', 'desc').get();
+    if (!snap.empty) {
+      const fbDeals = snap.docs.map(doc => doc.data());
+      localStorage.setItem(DEALS_KEY, JSON.stringify(fbDeals));
+      deals = fbDeals;
+      renderDeals();
+    }
+  } catch(e) { console.error('Error loading deals from Firebase:', e); }
+}
+if (USE_FIREBASE) loadDealsFirebase();
 let deals = loadDeals();
 let selectedAdForDeal = null;
 let editingDealId = null;
@@ -2332,6 +2357,7 @@ function completeDeal() {
     deal.dayPrice = Number(document.getElementById('dDayPrice')?.value) || 0;
   }
   deals = loadDeals(); deals.unshift(deal); saveDeals(deals);
+  if (USE_FIREBASE) saveDealsFirebase(deal, false);
   closeDealModal(); renderDeals();
   toast('تمت إضافة الصفقة بنجاح ✓', 'success');
 }
@@ -2447,6 +2473,7 @@ function saveDealEdit() {
     if (d.dateFrom && d.dateTo) d.days = Math.round((new Date(d.dateTo) - new Date(d.dateFrom)) / (1000*60*60*24));
   }
   deals[idx] = d; saveDeals(deals);
+  if (USE_FIREBASE) saveDealsFirebase(d, true);
   document.getElementById('dealEditModal').classList.remove('open');
   renderDeals();
   toast('تم تحديث الصفقة ✓', 'success');
