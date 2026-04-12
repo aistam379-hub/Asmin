@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم — طلبك تم</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link rel="stylesheet" href="admin-style.css">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#F6921E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="طلبك تم - الإدارة">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://upload-widget.cloudinary.com/global/all.js"></script>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#F6921E 0%,#E07D0A 50%,#d4660a 100%);display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto">
+  <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none">
+    <div style="position:absolute;top:-120px;right:-120px;width:400px;height:400px;border-radius:50%;background:rgba(255,255,255,.06)"></div>
+    <div style="position:absolute;bottom:-80px;left:-80px;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,.05)"></div>
+    <div style="position:absolute;top:40%;left:10%;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.04)"></div>
+  </div>
+  <form id="loginForm" onsubmit="event.preventDefault(); doLogin();" style="background:#fff;border-radius:28px;padding:44px 36px;max-width:420px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.25);text-align:center;position:relative;margin:auto;animation:loginCardIn .5s ease-out">
+    <style>
+      @keyframes loginCardIn{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
+      #loginEmail:focus{border-color:#F6921E !important;box-shadow:0 0 0 4px rgba(246,146,30,.12) !important}
+      #loginPass:focus{border-color:#F6921E !important;box-shadow:0 0 0 4px rgba(246,146,30,.12) !important}
+      #loginBtn:hover{background:#E07D0A !important;transform:translateY(-1px);box-shadow:0 8px 24px rgba(246,146,30,.5) !important}
+      #loginBtn:active{transform:scale(.97)}
+      @media (max-width: 767px) {
+        .login-logo { height: 100px !important; max-width: 250px; }
+        #loginForm { padding: 32px 24px !important; border-radius: 24px !important; }
+      }
+    </style>
+    <div style="margin-bottom:20px">
+      <img src="logo.png" class="login-logo" alt="طلبك تم" style="height:130px;width:auto;display:block;margin:0 auto;object-fit:contain">
+    </div>
+    <div style="text-align:right;margin-bottom:14px">
+      <label style="display:block;font-size:12px;font-weight:800;color:#525252;margin-bottom:6px">البريد الإلكتروني</label>
+      <div style="position:relative">
+        <input type="email" id="loginEmail" placeholder="admin@example.com" dir="ltr" required style="width:100%;padding:13px 16px 13px 44px;border:2px solid #e5e5e5;border-radius:14px;font-size:14px;font-family:inherit;outline:none;transition:all .2s;background:#fafafa;color:#171717">
+        <svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:#a3a3a3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+      </div>
+    </div>
+    <div style="text-align:right;margin-bottom:20px">
+      <label style="display:block;font-size:12px;font-weight:800;color:#525252;margin-bottom:6px">كلمة السر</label>
+      <div style="position:relative">
+        <input type="password" id="loginPass" placeholder="••••••••" dir="ltr" required style="width:100%;padding:13px 16px 13px 44px;border:2px solid #e5e5e5;border-radius:14px;font-size:14px;font-family:inherit;outline:none;transition:all .2s;background:#fafafa;color:#171717">
+        <svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:#a3a3a3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      </div>
+    </div>
+    <div id="loginError" style="color:#E11D48;font-size:13px;font-weight:700;margin-bottom:14px;display:none;background:#FFF1F2;padding:10px 14px;border-radius:10px;border:1px solid rgba(225,29,72,.15)"></div>
+    <button type="submit" id="loginBtn" style="width:100%;padding:15px;border:none;border-radius:14px;background:#F6921E;color:#fff;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;transition:all .2s;box-shadow:0 6px 20px rgba(246,146,30,.4);-webkit-tap-highlight-color:transparent">تسجيل الدخول</button>
+    <button type="button" onclick="location.reload()" style="margin-top:12px;background:none;border:none;color:#a3a3a3;font-size:12px;font-weight:600;cursor:pointer;text-decoration:underline">إعادة تحميل الصفحة</button>
+    <div style="margin-top:20px;font-size:11px;color:#a3a3a3;font-weight:600">طلبك تم © 2026</div>
+  </form>
+</div>
+
+
+<!-- Sidebar Overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- Sidebar - now on left side -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <img src="logo-white.png" class="sidebar-logo" alt="طلبك تم">
+    <div class="sidebar-brand">طلبك تم</div>
+    <div class="sidebar-label">لوحة التحكم</div>
+  </div>
+  <nav class="sidebar-nav">
+    <button class="nav-item active" onclick="showSection('ads')" data-section="ads">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      جميع الإعلانات
+      <span class="nav-badge" id="navAdCount">0</span>
+    </button>
+    <button class="nav-item" onclick="showSection('stats')" data-section="stats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+      الإحصائيات
+    </button>
+    <button class="nav-item" onclick="showSection('deals')" data-section="deals">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      الصفقات
+      <span class="nav-badge" id="navDealCount">0</span>
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <button onclick="doLogout()" style="width:100%;padding:10px;border:none;border-radius:10px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px;transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">تسجيل خروج</button>
+    <p>طلبك تم © 2026</p>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <!-- Topbar: Blue, curved, logo on left, menu button on right -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <img src="logo.png" class="topbar-logo" alt="طلبك تم" onclick="showSection('ads')" style="cursor:pointer;display:block;-webkit-user-drag:none" tabindex="0">
+    </div>
+    <div class="topbar-right">
+      <button class="mobile-menu-btn" onclick="openSidebar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Ads Section -->
+  <div class="content" id="sectionAds">
+    <div class="search-bar">
+      <div class="search-input-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="search-input" id="searchInput" placeholder="ابحث بالرقم الفريد أو عنوان الإعلان..." oninput="renderAds()">
+      </div>
+      <select class="filter-select" id="filterCat" onchange="renderAds()">
+        <option value="">كل الفئات</option>
+        <option value="apt-rent">شقق للإيجار</option>
+        <option value="apt-sale">شقق للبيع</option>
+        <option value="car-rent">سيارات للإيجار</option>
+        <option value="car-sale">سيارات للبيع</option>
+        <option value="equip-rent">معدات للإيجار</option>
+        <option value="equip-sale">معدات للبيع</option>
+        <option value="free-ad">إعلانات مجانية</option>
+      </select>
+      <button class="btn-add" onclick="openAddModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        إضافة إعلان
+      </button>
+    </div>
+
+    <!-- Desktop Table -->
+    <div class="ads-table-wrap">
+      <table class="ads-table">
+        <thead>
+          <tr>
+            <th>الرقم</th>
+            <th>الإعلان</th>
+            <th>الفئة</th>
+            <th>السعر</th>
+            <th>الموقع</th>
+            <th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="adsTableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <h3>لا توجد نتائج</h3>
+        <p>جرب البحث بكلمات مختلفة أو أضف إعلاناً جديداً</p>
+      </div>
+    </div>
+
+    <!-- Mobile Cards -->
+    <div class="mobile-cards" id="mobileCards"></div>
+
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+  <!-- Stats Section -->
+  <div class="content" id="sectionStats" style="display:none">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="chart-section">
+      <div class="chart-title">توزيع الإعلانات حسب الفئة</div>
+      <div class="chart-bars" id="chartBars"></div>
+    </div>
+  </div>
+
+  <!-- Deals Section -->
+  <div class="content" id="sectionDeals" style="display:none">
+    <!-- Deals revenue stat - at top -->
+    <div id="dealsRevenueCard" style="margin-bottom:20px"></div>
+    <!-- Deal search by ref -->
+    <div class="search-bar" style="margin-bottom:20px">
+      <div class="search-input-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="search-input" id="dealSearchInput" placeholder="ابحث بالـ ID أو عنوان الإعلان أو اسم العميل..." oninput="renderDeals()">
+      </div>
+      <select class="filter-select" id="dealFilterCat" onchange="renderDeals()">
+        <option value="">كل الفئات</option>
+        <option value="apt-rent">شقق للإيجار</option>
+        <option value="apt-sale">شقق للبيع</option>
+        <option value="car-rent">سيارات للإيجار</option>
+        <option value="car-sale">سيارات للبيع</option>
+        <option value="equip-rent">معدات للإيجار</option>
+        <option value="equip-sale">معدات للبيع</option>
+        <option value="free-ad">إعلانات مجانية</option>
+      </select>
+      <button class="btn-add" onclick="openAddDealModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        إضافة صفقة
+      </button>
+    </div>
+    <!-- Deals grid -->
+    <div id="dealsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px"></div>
+    <div id="dealsEmpty" class="empty-state" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <h3>لا توجد صفقات بعد</h3>
+      <p>اضغط على "إضافة صفقة" لإضافة أول صفقة</p>
+    </div>
+  </div>
+
+
+</div><!-- end .main -->
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="adModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">إضافة إعلان جديد</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-save" onclick="saveAd()">حفظ الإعلان</button>
+      <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Calendar Modal -->
+<div class="modal-overlay" id="calModal">
+  <div class="modal cal-modal">
+    <div class="modal-header">
+      <div class="modal-title">قفل أيام الحجز</div>
+      <button class="modal-close" onclick="closeCalModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="calPrev()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="cal-month-label" id="calMonthLabel"></div>
+        <button class="cal-nav-btn" onclick="calNext()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="range-controls">
+        <button class="range-btn" id="rangeModeBtn" onclick="toggleRangeMode()">تحديد نطاق (بداية/نهاية)</button>
+        <button class="range-btn reset-month-btn" id="toggleMonthBtn" onclick="toggleFullMonth()">تعطيل الشهر كامل</button>
+      </div>
+      <p style="margin-top:8px;font-size:12px;color:var(--s400);text-align:center">اختر يومين لتعطيل الفترة بينهما، أو استخدم زر تعطيل الشهر</p>
+      <div class="blocked-dates-list" id="blockedDatesList"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-save" onclick="saveBlockedDates()">حفظ التواريخ</button>
+      <button class="btn-cancel" onclick="closeCalModal()">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+    </div>
+    <div class="confirm-title">حذف الإعلان</div>
+    <div class="confirm-text" id="confirmText">هل أنت متأكد من حذف هذا الإعلان؟ لا يمكن التراجع عن هذا الإجراء.</div>
+    <div class="confirm-actions">
+      <button class="btn-confirm-del" id="btnConfirmDel">نعم، احذف</button>
+      <button class="btn-confirm-cancel" onclick="closeConfirm()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ad View Modal -->
+<div class="modal-overlay" id="adViewModal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <div class="modal-title" id="adViewTitle">تفاصيل الإعلان</div>
+      <button class="modal-close" onclick="document.getElementById('adViewModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body" id="adViewBody"></div>
+    <div class="modal-footer">
+      <button class="btn-save" onclick="openEditFromView()" style="background:var(--primary)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;display:inline;margin-left:6px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        تعديل
+      </button>
+      <button class="btn-cancel" onclick="document.getElementById('adViewModal').classList.remove('open')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deal Add Modal (2 steps) -->
+<div class="modal-overlay" id="dealModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="dealModalTitle">إضافة صفقة — اختر الإعلان</div>
+      <button class="modal-close" onclick="closeDealModal()">✕</button>
+    </div>
+    <div class="modal-body" id="dealModalBody"></div>
+    <div class="modal-footer" id="dealModalFooter"></div>
+  </div>
+</div>
+
+<!-- Deal Details Modal -->
+<div class="modal-overlay" id="dealDetailsModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">تفاصيل الصفقة</div>
+      <button class="modal-close" onclick="document.getElementById('dealDetailsModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body" id="dealDetailsBody"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="document.getElementById('dealDetailsModal').classList.remove('open')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deal Edit Modal -->
+<div class="modal-overlay" id="dealEditModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">تعديل الصفقة</div>
+      <button class="modal-close" onclick="document.getElementById('dealEditModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body" id="dealEditBody"></div>
+    <div class="modal-footer">
+      <button class="btn-save" onclick="saveDealEdit()">حفظ التعديلات</button>
+      <button class="btn-cancel" onclick="document.getElementById('dealEditModal').classList.remove('open')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="admin-app.js"></script>
+</body>
+</html>
